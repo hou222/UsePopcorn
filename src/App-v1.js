@@ -1,4 +1,4 @@
-import { Children, useEffect, useState } from "react";
+import { Children, useState } from "react";
 
 const tempMovieData = [
   {
@@ -50,41 +50,9 @@ const tempWatchedData = [
 const average = (arr) =>
   arr.reduce((acc, cur, i, arr) => acc + cur / arr.length, 0);
 
-const KEY = "2d47d08f";
-
 export default function App() {
-  const [movies, setMovies] = useState([]);
-  const [watched, setWatched] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
-  const query = "interste";
-
-  useEffect(function () {
-    async function fetchMovie() {
-      try {
-        setIsLoading(true);
-        const res = await fetch(
-          `http://www.omdbapi.com/?apikey=${KEY}&s=${query}`
-        );
-
-        if (!res.ok)
-          throw new Error("Something went wrong with fetching movies");
-
-        const data = await res.json();
-        console.log(data);
-        if (data.Response === "False") throw new Error("Movie not found");
-
-        setMovies(data.Search);
-      } catch (err) {
-        console.error(err.message);
-        setError(err.message);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-    fetchMovie();
-  }, []);
-
+  const [movies, setMovies] = useState(tempMovieData);
+  const [watched, setWatched] = useState(tempWatchedData);
   return (
     <>
       <NavBar>
@@ -92,13 +60,7 @@ export default function App() {
         <NumResults movies={movies} />
       </NavBar>
       <Main>
-        <Box>
-          {isLoading && <Loader />}
-          {!isLoading && !error && <MovieList movies={movies} />}
-          {error && <ErrorMessage message={error} />}
-
-          {/* {isLoading ? <Loader /> : <MovieList movies={movies} />} */}
-        </Box>
+        <Box element={<MovieList movies={movies} />} />
         <Box
           element={
             <>
@@ -119,18 +81,6 @@ export default function App() {
       </Main>
     </>
   );
-}
-
-function ErrorMessage({ message }) {
-  return (
-    <div className="error">
-      <span>⛔</span> {message}
-    </div>
-  );
-}
-
-function Loader() {
-  return <p className="loader">Loading...</p>;
 }
 
 function NavBar({ children }) {
@@ -201,7 +151,7 @@ function Movie({ movie }) {
   );
 }
 
-function Box({ children }) {
+function Box({ element }) {
   const [isOpen, setIsOpen] = useState(true);
 
   return (
@@ -209,7 +159,7 @@ function Box({ children }) {
       <button className="btn-toggle" onClick={() => setIsOpen((open) => !open)}>
         {isOpen ? "–" : "+"}
       </button>
-      {isOpen && children}
+      {isOpen && element}
     </div>
   );
 }
